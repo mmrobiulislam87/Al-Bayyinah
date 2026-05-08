@@ -150,7 +150,7 @@ const TAIL_SUFFIX: [RegExp, string][] = [
 ];
 
 function applySuffixRules(s: string): { head: string; tailBn: string } {
-  let rest = s;
+  const rest = s;
   for (const [re, rep] of TAIL_SUFFIX) {
     const m = rest.match(re);
     if (m && m.index !== undefined) {
@@ -202,7 +202,7 @@ function unpua(ch: string): string {
 function scanTailToBangla(tail: string): string {
   const x = expandDigraphsInTail(tail);
   const { head, tailBn } = applySuffixRules(x);
-  let core = head;
+  const core = head;
   let out = "";
   /** শেষ বর্ণ কি বাংলা ব্যঞজনবর্ণ — এর পর মাত্রা (া, ি…) লাগানো ঠিক */
   let canTakeMatra = false;
