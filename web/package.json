@@ -1,0 +1,33 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Al-Bayyinah — Quran search, research charts, learning, voice demo, wallet (Next.js)",
+  "scripts": {
+    "clean": "node -e \"try{require('fs').rmSync('.next',{recursive:true,force:true})}catch(e){} try{require('fs').rmSync('node_modules/.cache',{recursive:true,force:true})}catch(e){}\"",
+    "dev": "next dev",
+    "build": "next build",
+    "build:corpus": "node -e \"require('child_process').execSync('python ../scripts/build_word_corpus.py',{stdio:'inherit',cwd:__dirname})\"",
+    "sync:arabic:corpus": "node -e \"var c=require('child_process'); c.execSync('python ../scripts/sync_arabic_from_word_corpus.py',{stdio:'inherit',cwd:__dirname}); c.execSync('python ../scripts/split_ayahs_by_surah.py',{stdio:'inherit',cwd:__dirname});\"",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "framer-motion": "^12.38.0",
+    "next": "15.5.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^15.5.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

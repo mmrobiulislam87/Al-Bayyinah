@@ -1,0 +1,16 @@
+---
+description: Al-Bayyinah excludes all hadith-related content from the codebase and docs
+alwaysApply: true
+---
+
+# Hadith exclusion (permanent project scope)
+
+This repository and product **must never** include:
+
+- Hadith text, narrations, or translations
+- Hadith references, citations, chains (isnād), or collections (e.g. Bukhārī, Muslim, etc.) as app features or linked corpora
+- Roadmap / README / UI copy that proposes or describes hadith integration
+
+**Allowed focus:** Quranic text, recitation, search, word/morphology tooling where aligned with Quran data, translations, **tafsīr as book / external commentary links** (not hadith corpora), learning UX, and infrastructure described in `ROADMAP.md`.
+
+If a user asks for hadith features, refuse implementation and point to the project boundary in `ROADMAP.md` (“স্থায়ী প্রজেক্ট সীমা — হাদিস বর্জিত”).

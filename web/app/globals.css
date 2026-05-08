@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* ইসলামি থিম — মসজিদ-সাদৃশ গাঢ় সবুজ, সোনালি, ক্রিম পার্চমেন্ট */
+  --islamic-teal: #0f4c44;
+  --islamic-teal-deep: #0a3832;
+  --islamic-teal-muted: #134e44;
+  --islamic-gold: #d4a84b;
+  --islamic-gold-soft: #e8c97a;
+  --islamic-cream: #faf6ed;
+  --islamic-parchment: #f2ebe0;
+  --islamic-ink: #152826;
+  --islamic-ink-soft: #2d3d3a;
+
+  --background: var(--islamic-cream);
+  --foreground: var(--islamic-ink);
+  --font-quran-ar: "Amiri Quran", "Times New Roman", serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.dark {
+  --islamic-teal: #1a6b5c;
+  --islamic-teal-deep: #0d3d34;
+  --islamic-teal-muted: #134e44;
+  --islamic-gold: #e0b85c;
+  --islamic-gold-soft: #f0d18a;
+  --islamic-cream: #0f1c1a;
+  --islamic-parchment: #132824;
+  --islamic-ink: #e8f4f0;
+  --islamic-ink-soft: #b8d4cc;
+
+  --background: var(--islamic-cream);
+  --foreground: var(--islamic-ink);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--islamic-cream);
+  color: var(--islamic-ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  /* মোবাইল–ডেস্কটoplevel পাঠ: সব ডিভাইসে স্বাচ্ছন্দ্য */
+  font-size: clamp(1.03rem, 0.45vw + 0.96rem, 1.14rem);
+  line-height: 1.58;
+}
+
+.dark body {
+  background: var(--islamic-cream);
+  color: var(--islamic-ink);
+}
+
+/* বাংলা «অনুবাদ যোগ» ডায়ালগ — বাটন ক্লিকের সাথে মিলিয়ে ওপেন */
+@keyframes bn-dialog-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes bn-backdrop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.bn-add-dialog-panel {
+  animation: bn-dialog-pop 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+dialog.bn-add-dialog::backdrop {
+  animation: bn-backdrop-fade 0.24s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bn-add-dialog-panel {
+    animation: none;
+  }
+
+  dialog.bn-add-dialog::backdrop {
+    animation: none;
+  }
+}
