@@ -6,6 +6,20 @@ import { ClickableAyahText } from "@/components/ClickableAyahText";
 import { latinQuranLineToBanglaPhonetic } from "@/lib/quranLatinToBanglaPhonetic";
 import type { AyahRecord } from "@/lib/types";
 
+/**
+ * ল্যাটিন (Tanzil/risan স্টাইল) → বাংলা লিপির স্বয়ংক্রিয় রূপান্তর বহু শব্দে ভুল
+ * (যেমন الَّذِينَ ↔ যিনা/যিন, عَالَمِينَ ↔ আলামীন/আলামীনি)। পাবলিক মুখে এটি দেখালে বিভ্রান্তি হয়।
+ * নির্ভুল বাংলা প্রতিবর্ণ: `bengaliTransliterationScript` + `bengali_transliteration_overrides.json`।
+ * ডেভ-পরীক্ষার জন্য সত্য করতে পারেন — প্রকাশে রাখবেন না যত না ম্যানুয়ালি যাচাই হয়।
+ */
+const SHOW_LATIN_TO_BANGLA_HEURISTIC = false;
+
+/**
+ * আপাতত সমগ্র ব্লক (বাংলা প্রতিবর্ণ, Quran.com শব্দসার, রোমান ট্রান্সলিট) লুকানো —
+ * পরবর্তীতে নির্ভুলতা নিয়ে কাজের পর `true` করুন।
+ */
+const SHOW_AYAH_TRANSLITERATION_ASSIST_BLOCK = false;
+
 const glossCache = new Map<string, string>();
 
 type Props = {
@@ -16,10 +30,10 @@ type Props = {
 
 /**
  * আরবি পাঠের নিচে উচ্চারণ-সহায়ক স্তর:
- * 1) বাংলা লিপিতে ধ্বনি (প্রকল্প ল্যাটিন ট্রান্সলিট → বাংলাক্ষর; অনুমানিক)
- * 2) Quran.com WBW-র বাংলা শব্দসার (অর্থ-সূচক, অনুশীলন সহায়ক)
- * 3) প্রকল্পের বাংলা প্রতিবর্ণ (JSON)
- * 4) সম্পূর্ণ রোমান ধ্বনিলিপি
+ * 1) বাংলা প্রতিবর্ণ (যদি bengaliTransliterationScript / ওভাররাইডে থাকে)
+ * 2) ~~ল্যাটিন → বাংলা আনুমানিক~~ (বন্ধ — নির্ভুলতার জন্য; কোডে SHOW_LATIN_TO_BANGLA_HEURISTIC)
+ * 3) Quran.com WBW-র বাংলা শব্দসার (অর্থভিত্তিক)
+ * 4) সম্পূর্ণ রোমান ট্রান্সলিটারেশন
  */
 export function AyahTransliterationBelowArabic({
   r,
@@ -28,7 +42,10 @@ export function AyahTransliterationBelowArabic({
 }: Props) {
   const lat = r.latinTransliteration?.trim() ?? "";
   const bnScript = r.bengaliTransliterationScript?.trim() ?? "";
-  const bnPhoneticFromLatin = lat ? latinQuranLineToBanglaPhonetic(lat) : "";
+  const bnPhoneticFromLatin =
+    SHOW_LATIN_TO_BANGLA_HEURISTIC && lat ? latinQuranLineToBanglaPhonetic(lat) : "";
+  /** সত্যিকারের বাংলা প্রতিবর্ণ (JSON/ওভাররাইড) থাকলে ল্যাটিন→বাংলা আনুমানিক লাইন লুকোই — দ্বিবাক্য এড়ানো। */
+  const showLatinToBanglaHeuristic = Boolean(bnPhoneticFromLatin && !bnScript);
 
   const cacheKey = `${r.surah}:${r.ayah}`;
   const [glossLine, setGlossLine] = useState<string | undefined>(() =>
@@ -37,6 +54,7 @@ export function AyahTransliterationBelowArabic({
   const [glossErr, setGlossErr] = useState(false);
 
   useEffect(() => {
+    if (!SHOW_AYAH_TRANSLITERATION_ASSIST_BLOCK) return;
     const k = `${r.surah}:${r.ayah}`;
     if (glossCache.has(k)) {
       setGlossLine(glossCache.get(k)!);
@@ -68,6 +86,8 @@ export function AyahTransliterationBelowArabic({
     };
   }, [r.surah, r.ayah]);
 
+  if (!SHOW_AYAH_TRANSLITERATION_ASSIST_BLOCK) return null;
+
   const glossReady = glossLine !== undefined;
   const glossText = glossLine?.trim() ?? "";
 
@@ -97,10 +117,30 @@ export function AyahTransliterationBelowArabic({
         উচ্চারণ ও সহায়ক সারি
       </p>
 
-      {bnPhoneticFromLatin ? (
+      {bnScript ? (
         <div className="mb-3 space-y-1">
           <p className="text-[0.7rem] font-medium text-[var(--islamic-ink-soft)] dark:text-teal-400/90">
-            বাংলা লিপিতে ধ্বনি (পড়ার সহায়ক)
+            বাংলা প্রতিবর্ণ
+          </p>
+          <div
+            className="font-[family-name:var(--font-bn)] text-base leading-relaxed text-[var(--islamic-ink)] dark:text-teal-100/90 sm:text-lg"
+            lang="bn"
+            role="paragraph"
+          >
+            <ClickableAyahText
+              text={r.bengaliTransliterationScript}
+              lang="bn"
+              ayahRef={{ surah: r.surah, ayah: r.ayah }}
+              highlightRanges={bengaliScriptHighlightRanges ?? []}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {showLatinToBanglaHeuristic ? (
+        <div className="mb-3 space-y-1">
+          <p className="text-[0.7rem] font-medium text-[var(--islamic-ink-soft)] dark:text-teal-400/90">
+            বাংলা লিপিতে ধ্বনি (ল্যাটিন থেকে আনুমানিক)
           </p>
           <div
             className="font-[family-name:var(--font-bn)] text-base leading-relaxed text-[var(--islamic-ink)] dark:text-teal-100/90 sm:text-lg"
@@ -133,25 +173,6 @@ export function AyahTransliterationBelowArabic({
         <p className="mb-3 text-xs text-[var(--islamic-ink-soft)] dark:text-teal-500/80">
           বাংলা শব্দসার লোড হয়নি।
         </p>
-      ) : null}
-
-      {bnScript ? (
-        <div className="mb-3 space-y-1">
-          <p className="text-[0.7rem] font-medium text-[var(--islamic-ink-soft)] dark:text-teal-400/90">
-            প্রকল্পের বাংলা প্রতিবর্ণ
-          </p>
-          <div
-            className="font-[family-name:var(--font-bn)] text-base leading-relaxed text-[var(--islamic-ink)] dark:text-teal-100/90 sm:text-lg"
-            role="paragraph"
-          >
-            <ClickableAyahText
-              text={r.bengaliTransliterationScript}
-              lang="bn"
-              ayahRef={{ surah: r.surah, ayah: r.ayah }}
-              highlightRanges={bengaliScriptHighlightRanges ?? []}
-            />
-          </div>
-        </div>
       ) : null}
 
       {lat ? (

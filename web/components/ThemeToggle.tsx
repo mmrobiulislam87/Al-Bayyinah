@@ -8,10 +8,12 @@ function applyDark(on: boolean) {
   document.documentElement.classList.toggle("dark", on);
 }
 
+type Props = { className?: string };
+
 /**
  * সিস্টেম / লোকাল স্টোরেজ — রাতের মোড।
  */
-export default function ThemeToggle() {
+export default function ThemeToggle({ className = "" }: Props) {
   const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -37,7 +39,9 @@ export default function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <span className="inline-flex h-9 w-14 shrink-0 rounded-lg bg-teal-900/40" />
+      <span
+        className={`inline-flex h-9 w-14 shrink-0 rounded-full bg-teal-900/40 ${className}`}
+      />
     );
   }
 
@@ -45,7 +49,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="rounded-lg border border-white/25 bg-teal-900/35 px-3 py-1.5 text-xs font-[family-name:var(--font-bn)] text-teal-50 transition-colors hover:bg-teal-900/55 hover:border-[var(--islamic-gold)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--islamic-gold)]/60"
+      className={`rounded-full border border-white/25 bg-teal-900/35 px-3.5 py-2 text-xs font-[family-name:var(--font-bn)] text-teal-50 transition-colors hover:bg-teal-900/55 hover:border-[var(--islamic-gold)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--islamic-gold)]/60 ${className}`}
       aria-pressed={dark}
       title={dark ? "দিনের মোড" : "রাতের মোড"}
     >

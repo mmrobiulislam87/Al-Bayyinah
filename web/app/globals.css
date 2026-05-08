@@ -99,3 +99,96 @@ dialog.bn-add-dialog::backdrop {
     animation: none;
   }
 }
+
+/* সূরা পাঠ — কমপ্যাক্ট অডিও স্ক্রবার (নেটিভ controls-এর উচ্চ সাদা বার এর বদলে) */
+.dock-audio-scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.dock-audio-scrub::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--islamic-teal) 24%, transparent);
+}
+
+.dark .dock-audio-scrub::-webkit-slider-runnable-track {
+  background: color-mix(in srgb, rgb(125 211 192) 26%, transparent);
+}
+
+.dock-audio-scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px;
+  border-radius: 9999px;
+  background: var(--islamic-gold);
+  border: 2px solid color-mix(in srgb, white 92%, transparent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+}
+
+.dock-audio-scrub::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--islamic-teal) 24%, transparent);
+}
+
+.dark .dock-audio-scrub::-moz-range-track {
+  background: color-mix(in srgb, rgb(125 211 192) 26%, transparent);
+}
+
+.dock-audio-scrub::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: var(--islamic-gold);
+  border: 2px solid color-mix(in srgb, white 92%, transparent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+}
+
+.dock-audio-scrub:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ডক — আরও পাতলা স্ক্রব (কম উচ্চতার বার) */
+.dock-audio-scrub--compact {
+  height: 3px;
+}
+
+.dock-audio-scrub--compact::-webkit-slider-runnable-track {
+  height: 3px;
+}
+
+.dark .dock-audio-scrub--compact::-webkit-slider-runnable-track {
+  background: color-mix(in srgb, rgb(125 211 192) 22%, transparent);
+}
+
+.dock-audio-scrub--compact::-webkit-slider-thumb {
+  width: 10px;
+  height: 10px;
+  margin-top: -3.5px;
+  border-width: 1px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+}
+
+.dock-audio-scrub--compact::-moz-range-track {
+  height: 3px;
+}
+
+.dark .dock-audio-scrub--compact::-moz-range-track {
+  background: color-mix(in srgb, rgb(125 211 192) 22%, transparent);
+}
+
+.dock-audio-scrub--compact::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-width: 1px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+}

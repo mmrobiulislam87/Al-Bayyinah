@@ -22,13 +22,28 @@ export type SurahReciterOption = {
   labelBn: string;
 };
 
-/** শ্রুতিমধুর, সুপরিচিত কয়েকজন — CDN-এ `ar.*` আইডি। */
+/** শ্রুতিমধুর ক্বারী — Al Quran Cloud `ar.*` আইডি, Islamic Network CDN। */
 export const SURAH_RECITERS: SurahReciterOption[] = [
   { id: "ar.alafasy", labelBn: "মিশারি রাশিদ আল-আফাস্য" },
   { id: "ar.husary", labelBn: "মাহমূদ খলীল আল-হুসারী" },
-  { id: "ar.mahermuaiqly", labelBn: "মাহের আল-মুআয়ক্বলী" },
-  { id: "ar.abdullahbasfar", labelBn: "আবদুল্লাহ বাসফার" },
+  { id: "ar.mahermuaiqly", labelBn: "মাহের আল-মুআইকলি" },
   { id: "ar.abdurrahmaansudais", labelBn: "আবদুর রহমান আস-সুদাইস" },
+  { id: "ar.abdullahbasfar", labelBn: "আব্দুল্লাহ আল-বাসফার" },
+  { id: "ar.abdulbasitmurattal", labelBn: "আব্দুল বাসিত (মুরাত্তাল)" },
+  { id: "ar.abdulsamad", labelBn: "আব্দুল বাসিত (আব্দুস সামাদ)" },
+  { id: "ar.shaatree", labelBn: "আবু বাকার আশ-শাত্রী" },
+  { id: "ar.ahmedajamy", labelBn: "আহমাদ ইবনে আলী আল-আজামি" },
+  { id: "ar.husarymujawwad", labelBn: "আল-হুসারী (মুজাওয়াদ)" },
+  { id: "ar.hudhaify", labelBn: "আলী আল-হুযাইফি" },
+  { id: "ar.hanirifai", labelBn: "হানি আর-রিফাই" },
+  { id: "ar.ibrahimakhbar", labelBn: "ইব্রাহীম আল-আখদার" },
+  { id: "ar.minshawi", labelBn: "মুহাম্মাদ সিদ্দীক আল-মিনশাবী" },
+  { id: "ar.minshawimujawwad", labelBn: "আল-মিনশাবী (মুজাওয়াদ)" },
+  { id: "ar.muhammadayyoub", labelBn: "মুহাম্মাদ আইয়ূব" },
+  { id: "ar.muhammadjibreel", labelBn: "মুহাম্মাদ জিবরীল" },
+  { id: "ar.saoodshuraym", labelBn: "সউদ আশ-শুরাইম" },
+  { id: "ar.aymanswoaid", labelBn: "আইমান সোয়াইদ" },
+  { id: "ar.parhizgar", labelBn: "শেহরিয়ার পারহিজগার" },
 ];
 
 export const DEFAULT_SURAH_RECITER_ID = "ar.alafasy";
