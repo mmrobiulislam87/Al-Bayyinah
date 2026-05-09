@@ -28,6 +28,9 @@
 .DS_Store
 *.pem
 
+# ephemeral PDF raster previews (keep local only)
+.tajweed-pdf-page*.png
+
 # debug
 npm-debug.log*
 yarn-debug.log*

@@ -22,10 +22,10 @@
     "next": "15.5.16",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
-    "wrangler": "^4.19.0",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -34,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "^15.5.16",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.19.0"
   }
 }

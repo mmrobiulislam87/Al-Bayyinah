@@ -39,6 +39,7 @@ export const RESEARCH_LAB_MODULES: readonly ResearchLabModule[] = [
       "রূপক, উপমা, মেটাফর ইত্যাদি চিহ্নিত করে অনুসন্ধান।",
     ],
     technicalBn: [
+      "চালু: `GET /api/research/morphology?q=` — বহুভাষা রুট মিল ও দ্বিস্তরীয় BN গ্লোস (`morphologySemanticLayers.ts`)।",
       "লাইসেন্সকৃত মরফো+ডিপেনডেন্সি কorpus ইমপোর্ট (পাইপলাইন `ROADMAP` অনুযায়ী)।",
       "বালাগাহ স্তর বিশেষজ্ঞ-কুরেটেড বা সূত্রযুক্ত ট্যাগ।",
     ],

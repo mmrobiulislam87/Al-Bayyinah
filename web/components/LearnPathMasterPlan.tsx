@@ -53,7 +53,7 @@ export default function LearnPathMasterPlan({ streak }: Props) {
             href="#daily-flow"
             className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[var(--islamic-teal-deep)] px-5 py-3 font-[family-name:var(--font-bn)] text-sm font-semibold text-white shadow-md hover:brightness-110 dark:bg-teal-800"
           >
-            আজকের তিন ধাপে নামুন ↓
+            আজকের চার ধাপে নামুন ↓
           </Link>
         </div>
 

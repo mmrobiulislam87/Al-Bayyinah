@@ -16,26 +16,38 @@ import {
   learnRewardAmounts,
 } from "@/lib/learnRewards";
 import AlphabetDragExercise from "@/components/AlphabetDragExercise";
+import HijaiLetterSoundboard from "@/components/HijaiLetterSoundboard";
+import TajweedBatchInspiredPractice from "@/components/TajweedBatchInspiredPractice";
 import LearnPathMasterPlan from "@/components/LearnPathMasterPlan";
-import { ALPHABET_DAILY_PAIRS } from "@/lib/learnAlphabetSets";
+import {
+  ALPHABET_DAILY_PAIRS,
+  hijaiLettersWithNames,
+} from "@/lib/learnAlphabetSets";
 
 const PAIRS = ALPHABET_DAILY_PAIRS;
+const HIJAI_LETTERS = hijaiLettersWithNames();
 
 const STEPS = [
   {
     id: 1 as const,
-    short: "১ · আজকের কাজ",
-    label: "ধাপ ১ — আজ একটু সময় দিলেই হবে (মিশন + স্ট্রিক)",
+    short: "১ · একক হরফ",
+    label:
+      "ধাপ ১ — ১ম সূত্র: বর্ণমালা ২৯ হরফ; টিপে আরবি হরফনাম (৩ সারি, ডান→বাম)",
   },
   {
     id: 2 as const,
-    short: "২ · চার হরফ",
-    label: "ধাপ ২ — খেলার মতো: ছবি আর শব্দ মিলিয়ে হরফ চেনা",
+    short: "২ · মিলিয়ে খেলা",
+    label: "ধাপ ২ — আধুনিক (এলোমেলো) বা হিজাই ক্রমে ড্র্যাগ করে মিল",
   },
   {
     id: 3 as const,
     short: "৩ · লাম–আলিফ",
-    label: "ধাপ ৩ — দুটো হরফ মিলে এক রূপ (যুক্তবর্ণ দেখা)",
+    label: "ধাপ ৩ — লাম ও আলিফ মিলিয়ে যুক্ত রূপ (لا)",
+  },
+  {
+    id: 4 as const,
+    short: "৪ · আজকের মিশন",
+    label: "ধাপ ৪ — এক লাইন কাজ টিক দিন, স্ট্রিক ও হিকমাহ",
   },
 ];
 
@@ -74,6 +86,9 @@ const REWARD_AMTS = learnRewardAmounts();
 
 export default function LearnModuleClient() {
   const [activeStep, setActiveStep] = useState<StepId>(1);
+  const [soundboardEpoch, setSoundboardEpoch] = useState(0);
+  const [soundCycleDone, setSoundCycleDone] = useState(false);
+  const [bankOrder, setBankOrder] = useState<"shuffle" | "hijai">("shuffle");
   const [pointsToast, setPointsToast] = useState<string | null>(null);
   const [dailyAlphabetDone, setDailyAlphabetDone] = useState(false);
   const [learn, setLearn] = useState<LearningPersist>(LEARN_DEFAULT);
@@ -81,6 +96,16 @@ export default function LearnModuleClient() {
     null,
   );
   const [motionReplayKey, setMotionReplayKey] = useState(0);
+
+  const goStep = useCallback((id: StepId) => {
+    setActiveStep((prev) => {
+      if (id === 1 && prev !== 1) {
+        setSoundboardEpoch((e) => e + 1);
+        setSoundCycleDone(false);
+      }
+      return id;
+    });
+  }, []);
 
   useEffect(() => {
     setLearn(getLearningState());
@@ -97,7 +122,24 @@ export default function LearnModuleClient() {
     if (activeStep !== 2) setDailyAlphabetDone(false);
   }, [activeStep]);
 
-  /** দ্বিতীয় সেশন (আলফাবেট) শেষ → পয়েন্ট + তৃতীয় সেশন স্বয়ংক্রিয় */
+  useEffect(() => {
+    if (activeStep !== 1) setSoundCycleDone(false);
+  }, [activeStep]);
+
+  /** ধাপ ১ — ২৯ হরফের নাম টিচ সাইক্ল সমাপ্ত → পয়েন্ট + পরের ধাপ */
+  useEffect(() => {
+    if (!soundCycleDone || activeStep !== 1) return;
+    const gained = awardLearnStepIfFirstToday("hijai_listen");
+    if (gained > 0) {
+      setPointsToast(
+        `+${toBengaliDigits(gained)} হিকমাহ পয়েন্ট · হরফ শোনা সম্পূর্ণ`,
+      );
+    }
+    const id = window.setTimeout(() => goStep(2), gained > 0 ? 900 : 700);
+    return () => window.clearTimeout(id);
+  }, [soundCycleDone, activeStep, goStep]);
+
+  /** ধাপ ২ ড্র্যাগ খেলা শেষ → পয়েন্ট + লাম–আলিফের ধাপ */
   useEffect(() => {
     if (!dailyAlphabetDone || activeStep !== 2) return;
     const gained = awardLearnStepIfFirstToday("alphabet");
@@ -106,42 +148,57 @@ export default function LearnModuleClient() {
         `+${toBengaliDigits(gained)} হিকমাহ পয়েন্ট · ধাপ ২ সম্পন্ন`,
       );
     }
-    const id = window.setTimeout(() => setActiveStep(3), 750);
+    const id = window.setTimeout(() => goStep(3), 750);
     return () => window.clearTimeout(id);
-  }, [dailyAlphabetDone, activeStep]);
+  }, [dailyAlphabetDone, activeStep, goStep]);
 
-  /** তৃতীয় ধাপে প্রবেশে পয়েন্ট (আজ প্রথমবার) — টোস্ট আলাদা না ধাক্কায় একটু দেরি */
+  /** ধাপ ৩ লাম–আলিফে প্রথম থাকলে আজ একবার পয়েন্ট */
   useEffect(() => {
     if (activeStep !== 3) return;
     const id = window.setTimeout(() => {
       const gained = awardLearnStepIfFirstToday("motion");
       if (gained > 0) {
         setPointsToast(
-          `+${toBengaliDigits(gained)} হিকমাহ পয়েন্ট · ধাপ ৩ (যুক্তবর্ণ)`,
+          `+${toBengaliDigits(gained)} হিকমাহ পয়েন্ট · ধাপ ৩ যুক্তবর্ণ`,
         );
       }
     }, 500);
     return () => window.clearTimeout(id);
   }, [activeStep]);
 
-  const markDone = useCallback(() => {
+  const markMissionDone = useCallback(() => {
     const meta = completeTodayMissionWithMeta();
     setLearn(meta.state);
     const gained = awardLearnStepIfFirstToday("mission");
     if (gained > 0) {
       setPointsToast(
-        `+${toBengaliDigits(gained)} হিকমাহ পয়েন্ট · ধাপ ১ সম্পন্ন`,
+        `+${toBengaliDigits(gained)} হিকমাহ পয়েন্ট · আজকের মিশন টিক হয়েছে`,
       );
     }
-    setActiveStep(2);
   }, []);
 
   const goNext = useCallback(() => {
-    setActiveStep((s) => (s < 3 ? ((s + 1) as StepId) : s));
+    setActiveStep((prev) => {
+      if (prev >= 4) return prev;
+      const n = (prev + 1) as StepId;
+      if (n === 1 && prev !== 1) {
+        setSoundboardEpoch((e) => e + 1);
+        setSoundCycleDone(false);
+      }
+      return n;
+    });
   }, []);
 
   const goPrev = useCallback(() => {
-    setActiveStep((s) => (s > 1 ? ((s - 1) as StepId) : s));
+    setActiveStep((prev) => {
+      if (prev <= 1) return prev;
+      const n = (prev - 1) as StepId;
+      if (n === 1 && prev !== 1) {
+        setSoundboardEpoch((e) => e + 1);
+        setSoundCycleDone(false);
+      }
+      return n;
+    });
   }, []);
 
   const replayMotion = useCallback(() => {
@@ -156,10 +213,10 @@ export default function LearnModuleClient() {
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-[var(--islamic-ink-soft)] dark:text-teal-300/85">
           <strong className="font-semibold text-[var(--islamic-teal)] dark:text-teal-200">
-            ভাবুন আপনি শুধু আজকের ছোট এক পাঠটুকু শিখছেন —
+            এই পৃষ্ঠায় খুললেই চার ধাপে শেখা চলে —
           </strong>{" "}
-          একসাথে অনেক কিছু নয়। নিচে তিনটা বোতামে ধাপ ধাপ এগোন; প্রতিটি সেশন কয়েক মিনিটের। উপরের
-          মানচিত্র থেকে দেখে নিতে পারেন পুরো যাত্রাটা কোথায় নিয়ে যাবে। আরও খেলা:{" "}
+          প্রথমে হিজাই হরফ স্পষ্ট নাম ও উচ্চারণ, তারপর ছবিমিল খেলা, তারপর লাম–আলিফ, শেষে আজকের এক লাইন
+          আর স্ট্রিক। আরও অনুশীলনে:{" "}
           <Link
             href="/learn/games"
             className="font-semibold text-[var(--islamic-teal-deep)] underline-offset-4 hover:underline dark:text-amber-200/95"
@@ -170,20 +227,18 @@ export default function LearnModuleClient() {
         </p>
       </header>
 
-      <LearnPathMasterPlan streak={learn.streak} />
-
       {/* ধাপ ইন্ডিকেটর */}
       <nav
         id="daily-flow"
-        className="mb-10 scroll-mt-24 rounded-2xl border border-[var(--islamic-teal)]/18 bg-white/75 p-3 shadow-sm dark:border-teal-800/45 dark:bg-teal-950/45"
-        aria-label="আজকের তিন ধাপ"
+        className="mb-8 scroll-mt-24 rounded-2xl border border-[var(--islamic-teal)]/18 bg-white/75 p-3 shadow-sm dark:border-teal-800/45 dark:bg-teal-950/45"
+        aria-label="চার ধাপে আজকের শেখা"
       >
         <ol className="flex flex-wrap items-center justify-center gap-2 sm:justify-between sm:gap-3">
           {STEPS.map((step, i) => (
             <li key={step.id} className="flex flex-1 items-center gap-2 sm:min-w-0">
               <button
                 type="button"
-                onClick={() => setActiveStep(step.id)}
+                onClick={() => goStep(step.id)}
                 aria-current={activeStep === step.id ? "step" : undefined}
                 className={`flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-xl px-2 py-2 text-center font-[family-name:var(--font-bn)] text-xs font-semibold transition sm:text-sm ${
                   activeStep === step.id
@@ -222,48 +277,45 @@ export default function LearnModuleClient() {
         ) : null}
       </nav>
 
-      {/* ধাপ ১ */}
+      {/* ধাপ ১ · হরফ টিপে নাম ও উচ্চারণ */}
       {activeStep === 1 ? (
         <section className="mb-10 rounded-xl border border-[var(--islamic-teal)]/18 bg-white/85 p-5 shadow-sm dark:border-teal-800/45 dark:bg-teal-950/50">
-          <p className="mb-3 rounded-lg border border-[var(--islamic-teal)]/15 bg-[var(--islamic-parchment)]/60 px-3 py-2 font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal-deep)] dark:border-teal-800/40 dark:bg-teal-900/35 dark:text-teal-100">
-            <strong className="font-semibold">সবচেয়ে সহজ শুরু:</strong> এক মিনিটে পড়ুন নিচের এক লাইন, তারপর বোতাম চাপুন। ভুলে যাওয়ার ভয় নেই — আবার আসলেই হবে।
-          </p>
-          <h2 className="mb-3 font-[family-name:var(--font-bn)] text-lg font-semibold text-[var(--islamic-teal)] dark:text-teal-200">
-            আজকের ছোট কাজ (
-            {mission ? toBengaliDigits(mission.minutes) : toBengaliDigits(10)}{" "}
-            মিনিটের মতো)
+          <h2 className="mb-2 font-[family-name:var(--font-bn)] text-lg font-semibold text-[var(--islamic-teal)] dark:text-teal-200">
+            ১ম সূত্র — আরবী বর্ণমালা · তিনটি সারিতে উনত্রিশ টি একক হরফ
           </h2>
-          <p className="font-[family-name:var(--font-bn)] text-[var(--islamic-ink)] dark:text-teal-50/95">
-            {mission?.title ?? "মিশন লোড হচ্ছে…"}
+          <p className="mb-5 text-sm leading-relaxed text-[var(--islamic-ink-soft)] dark:text-teal-400/92">
+          <p className="mb-5 text-sm leading-relaxed text-[var(--islamic-ink-soft)] dark:text-teal-400/92">
+            তিন সারি বারো, দশ ও সাত খানায় মোট ২৯ টি হরফ; শেষ সারিতে و ه ء ي । ডান থেকে বাম মিলিয়ে দেখুন আরবি পড়ার দিক । টিপুন — আনুষ্ঠানিক আরবি নাম ও বাংলা সহায়ক লেখা; আরবি ভয়েস না থাকলে বাংলায় শুনুন । নীচে হরকত ও তানউইনের ডেমো; খাতার সম্পূর্ণ কাজ শিক্ষকের নির্দেশ । সব বোতাম একবার করে টিপা হলেই পরের ধাপ খুলবে বা বোতাম চাপুন ।
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-3">
+          </p>
+          <HijaiLetterSoundboard
+            key={soundboardEpoch}
+            letters={HIJAI_LETTERS}
+            onFirstFullCoverage={() => setSoundCycleDone(true)}
+          />
+          <TajweedBatchInspiredPractice />
+          <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-[var(--islamic-teal)]/10 pt-5 dark:border-teal-800/30">
             <button
               type="button"
-              onClick={markDone}
-              className="rounded-lg bg-[var(--islamic-teal-deep)] px-4 py-2.5 font-[family-name:var(--font-bn)] text-sm font-semibold text-white shadow hover:brightness-110 dark:bg-teal-800"
+              disabled
+              aria-disabled="true"
+              className="rounded-lg border border-[var(--islamic-teal)]/20 px-4 py-2 font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-ink-soft)] opacity-40 dark:border-teal-800/35 dark:text-teal-500"
             >
-              হয়ে গেছে — আজকের কাজ টিক দিন
+              এখানে আগের ধাপ নেই
             </button>
-            <span className="font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal-deep)] dark:text-amber-200/95">
-              টানা শেখার দিন: {toBengaliDigits(learn.streak)}
-            </span>
-          </div>
-          <p className="mt-3 font-[family-name:var(--font-bn)] text-xs text-[var(--islamic-ink-soft)] dark:text-teal-400/90">
-            এখানে চাপলে স্ট্রিক হয়, আজ প্রথমবার হলে{" "}
-            <strong className="text-[var(--islamic-teal-deep)] dark:text-amber-200/95">
-              +{toBengaliDigits(REWARD_AMTS.mission)} হিকমাহ
-            </strong>{" "}
-            যোগ হয় (দিনে একবার)। তারপর পরের ধাপ নিজে খুলবে — আপনাকে খুঁজে বের করতে হবে না।
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-[var(--islamic-teal)]/10 pt-5 dark:border-teal-800/30">
             <button
               type="button"
-              onClick={() => setActiveStep(2)}
-              className="font-[family-name:var(--font-bn)] text-xs text-[var(--islamic-teal)] underline-offset-4 hover:underline dark:text-teal-400"
+              disabled={!soundCycleDone}
+              onClick={() => goStep(2)}
+              className="rounded-lg bg-[var(--islamic-teal-deep)] px-4 py-2 font-[family-name:var(--font-bn)] text-sm font-semibold text-white shadow hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-teal-800"
             >
-              মিশন না পড়েই সোজা চার হরফের খেলায় যেতে চাইলে
+              পরের ধাপে যান · মিলিয়ে খেলা
             </button>
           </div>
+          <p className="mt-4 font-[family-name:var(--font-bn)] text-xs text-[var(--islamic-ink-soft)] dark:text-teal-500">
+            টানা শেখার দিন: {toBengaliDigits(learn.streak)} · হরফ ধাপে আজই প্রথমবার সম্পূর্ণ হলে
+            +{toBengaliDigits(REWARD_AMTS.hijai_listen)} হিকমাহ পর্যন্ত (দিনে একবার) ।
+          </p>
         </section>
       ) : null}
 
@@ -272,8 +324,36 @@ export default function LearnModuleClient() {
         <section className="mb-10 rounded-xl border border-[var(--islamic-teal)]/15 bg-white/80 p-5 dark:border-teal-800/40 dark:bg-teal-950/40">
           <div className="mb-4">
             <h2 className="font-[family-name:var(--font-bn)] text-lg font-semibold">
-              চারটি হরফ — টেনে মিলান, চাপ দিয়েও মিলান
+              চারটি হরফ — টেনে মিলান, টিপেও মিলান
             </h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={bankOrder === "shuffle"}
+                onClick={() => setBankOrder("shuffle")}
+                className={`rounded-xl border px-3 py-1.5 font-[family-name:var(--font-bn)] text-xs font-semibold transition ${
+                  bankOrder === "shuffle"
+                    ? "border-[var(--islamic-gold)]/70 bg-[var(--islamic-gold)]/20 text-[var(--islamic-teal-deep)] dark:border-amber-500/65 dark:bg-amber-900/35 dark:text-amber-100"
+                    : "border-[var(--islamic-teal)]/20 bg-white/80 text-[var(--islamic-teal-deep)] hover:border-[var(--islamic-teal)]/45 dark:border-teal-800/55 dark:bg-teal-950/50"
+                }`}
+              >
+                আধুনিক · হরফ ব্যাঙ্ক এলোমেলো
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={bankOrder === "hijai"}
+                onClick={() => setBankOrder("hijai")}
+                className={`rounded-xl border px-3 py-1.5 font-[family-name:var(--font-bn)] text-xs font-semibold transition ${
+                  bankOrder === "hijai"
+                    ? "border-[var(--islamic-gold)]/70 bg-[var(--islamic-gold)]/20 text-[var(--islamic-teal-deep)] dark:border-amber-500/65 dark:bg-amber-900/35 dark:text-amber-100"
+                    : "border-[var(--islamic-teal)]/20 bg-white/80 text-[var(--islamic-teal-deep)] hover:border-[var(--islamic-teal)]/45 dark:border-teal-800/55 dark:bg-teal-950/50"
+                }`}
+              >
+                ক্লাসিক · হিজাই ক্রমে সাজানো ব্যাঙ্ক
+              </button>
+            </div>
             <p className="mt-2 text-sm leading-relaxed text-[var(--islamic-ink-soft)] dark:text-teal-400/90">
               আগে মুখস্থ করার চাপ নেই। শুধু{" "}
               <strong className="text-[var(--islamic-teal-deep)] dark:text-amber-200/95">চারটা</strong> হরফ{" "}
@@ -300,6 +380,7 @@ export default function LearnModuleClient() {
 
           <AlphabetDragExercise
             pairs={PAIRS}
+            bankOrder={bankOrder}
             onSolved={() => setDailyAlphabetDone(true)}
             onReset={() => setDailyAlphabetDone(false)}
           />
@@ -316,7 +397,7 @@ export default function LearnModuleClient() {
               </p>
               <button
                 type="button"
-                onClick={() => setActiveStep(3)}
+                onClick={() => goStep(3)}
                 className="w-full rounded-xl border border-green-700/30 bg-white/90 py-2.5 font-[family-name:var(--font-bn)] text-sm font-semibold text-green-900 shadow-sm hover:bg-white dark:border-green-600/40 dark:bg-teal-950/80 dark:text-green-200 sm:w-auto sm:px-6"
               >
                 লাম–আলিফের ধাপে যান
@@ -435,14 +516,24 @@ export default function LearnModuleClient() {
               onClick={goPrev}
               className="rounded-lg border border-[var(--islamic-teal)]/30 px-4 py-2 font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal-deep)] hover:bg-white/80 dark:border-teal-700/50 dark:text-teal-200 dark:hover:bg-teal-900/50"
             >
-              ← আগের ধাপ (চার হরফ)
+              ← আগের ধাপ (মিল খেলা)
             </button>
             <button
               type="button"
-              onClick={() => setActiveStep(1)}
-              className="rounded-lg font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal)] underline-offset-4 hover:underline dark:text-teal-300"
+              onClick={() => goStep(4)}
+              className="w-full rounded-xl bg-[var(--islamic-teal-deep)] px-4 py-2.5 font-[family-name:var(--font-bn)] text-sm font-semibold text-white shadow hover:brightness-110 dark:bg-teal-800 sm:w-auto"
             >
-              প্রথম ধাপে ফিরুন (আজকের কাজ)
+              এরপর · আজকের মিশন ও স্ট্রিক টিক দিন →
+            </button>
+          </div>
+
+          <div className="mt-4 flex flex-wrap justify-center gap-2 border-t border-[var(--islamic-teal)]/10 pt-4 dark:border-teal-800/35">
+            <button
+              type="button"
+              onClick={() => goStep(1)}
+              className="font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal)] underline-offset-4 hover:underline dark:text-teal-300"
+            >
+              হরফ টিপে শোনা শুরুর ধাপে ফিরুন
             </button>
           </div>
 
@@ -460,6 +551,59 @@ export default function LearnModuleClient() {
         </section>
       ) : null}
 
+      {/* ধাপ ৪ · আজকের মিশন ও স্ট্রিক */}
+      {activeStep === 4 ? (
+        <section className="mb-10 rounded-xl border border-[var(--islamic-teal)]/18 bg-white/85 p-5 shadow-sm dark:border-teal-800/45 dark:bg-teal-950/50">
+          <p className="mb-3 rounded-lg border border-[var(--islamic-teal)]/15 bg-[var(--islamic-parchment)]/60 px-3 py-2 font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal-deep)] dark:border-teal-800/40 dark:bg-teal-900/35 dark:text-teal-100">
+            <strong className="font-semibold">আজকের চূড়ান্ত টিক:</strong> এক লাইন পড়ে নিন, টিক চাপুন —
+            টানা শেখার দিন বাড়বে ও হিকমাহ মিলতে পারে।
+          </p>
+          <h2 className="mb-3 font-[family-name:var(--font-bn)] text-lg font-semibold text-[var(--islamic-teal)] dark:text-teal-200">
+            ছোট কাজ (
+            {mission ? toBengaliDigits(mission.minutes) : toBengaliDigits(10)} মিনিটের মতো)
+          </h2>
+          <p className="font-[family-name:var(--font-bn)] text-[var(--islamic-ink)] dark:text-teal-50/95">
+            {mission?.title ?? "মিশন লোড হচ্ছে…"}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={markMissionDone}
+              className="rounded-lg bg-[var(--islamic-teal-deep)] px-4 py-2.5 font-[family-name:var(--font-bn)] text-sm font-semibold text-white shadow hover:brightness-110 dark:bg-teal-800"
+            >
+              হয়ে গেছে — আজকের কাজ টিক দিন
+            </button>
+            <span className="font-[family-name:var(--font-bn)] text-sm text-[var(--islamic-teal-deep)] dark:text-amber-200/95">
+              টানা শেখার দিন: {toBengaliDigits(learn.streak)}
+            </span>
+          </div>
+          <p className="mt-3 font-[family-name:var(--font-bn)] text-xs text-[var(--islamic-ink-soft)] dark:text-teal-400/90">
+            আজ প্রথমবার এই টিক থেকে এক দিনের মধ্যে{" "}
+            <strong className="text-[var(--islamic-teal-deep)] dark:text-amber-200/95">
+              +{toBengaliDigits(REWARD_AMTS.mission)} হিকমাহ
+            </strong>{" "}
+            । বিস্তারিত ওয়ালেটে।
+          </p>
+          <div className="mt-6 border-t border-[var(--islamic-teal)]/10 pt-5 dark:border-teal-800/30">
+            <Link
+              href="/wallet"
+              className="font-[family-name:var(--font-bn)] text-sm font-semibold text-[var(--islamic-teal-deep)] underline-offset-4 hover:underline dark:text-amber-200/95"
+            >
+              ওয়ালেট খুলুন →
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      <details className="mt-12 rounded-2xl border border-[var(--islamic-teal)]/20 bg-white/60 dark:border-teal-800/45 dark:bg-teal-950/35">
+        <summary className="cursor-pointer list-none px-4 py-3 font-[family-name:var(--font-bn)] text-sm font-semibold text-[var(--islamic-teal-deep)] dark:text-teal-100 [&::-webkit-details-marker]:hidden">
+          শেখার পুরো মানচিত্র · পরের পর্বসমূহ (খুললে লম্বা)
+        </summary>
+        <div className="border-t border-[var(--islamic-teal)]/10 px-3 pb-4 pt-3 dark:border-teal-800/35">
+          <LearnPathMasterPlan streak={learn.streak} />
+        </div>
+      </details>
+
       {/* নিচের দিকে দ্রুত ধাপ পরিবর্তন (মোবাইল ফ্রেন্ডলি) */}
       <div className="mt-10 flex justify-center gap-3 border-t border-[var(--islamic-teal)]/12 pt-6 dark:border-teal-800/35">
         <button
@@ -470,7 +614,7 @@ export default function LearnModuleClient() {
         >
           পূর্ববর্তী
         </button>
-        {activeStep === 3 ? (
+        {activeStep === 4 ? (
           <Link
             href="/learn/games"
             className="rounded-xl bg-[var(--islamic-teal-deep)] px-5 py-2 font-[family-name:var(--font-bn)] text-sm font-semibold text-white hover:brightness-110 dark:bg-teal-800"
@@ -480,7 +624,7 @@ export default function LearnModuleClient() {
         ) : (
           <button
             type="button"
-            disabled={activeStep >= 3}
+            disabled={activeStep >= 4}
             onClick={goNext}
             className="rounded-xl bg-[var(--islamic-teal-deep)] px-5 py-2 font-[family-name:var(--font-bn)] text-sm font-semibold text-white disabled:opacity-40 dark:bg-teal-800"
           >

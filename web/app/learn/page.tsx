@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-
-import LearnModuleClient from "@/components/LearnModuleClient";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "শেখা — সহজে ধাপে ধাপে",
+  title: "শেখা",
+  description: "ফান্ডামেন্টালস ল্যাবে আরবি বর্ণ শেখার প্রবেশ দ্বার ।",
 };
 
 export default function LearnPage() {
-  return <LearnModuleClient />;
+  redirect("/learn/fundamentals");
 }

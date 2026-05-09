@@ -29,6 +29,7 @@
 | **২.৫** কনকর্ডেন্স + গবেষণাগার হাব | `GET /api/research/concordance` — টোকেন মিল + আয়াত সূচী; **`/research/lab`** — অন্টোলজি/মুনাসাবাহ সিড, ক্রোনোলজি টেবিল, ওয়ার্কস্পেস; `GET /api/research/meaning-search` — `_searchText` অনুবাদ-ব্লব মিল (ভেক্টর নয়) |
 | **২.৬** তাফসীর প্রবেশ + ল্যাব নোট | **`/research/tafsir`** — আয়াত + বহিরাগত সম্পদ লিঙ্ক; **`researchWorkspaceLocal.ts`** + সূরা **`AyahBlock`** «গবেষক নোট» → `/research/lab?m=workspace&v=…` |
 | **২.৭** ভেক্টর স্ক্যাফোল্ড | **`supabase/migrations/20260506140000_ayah_embedding_pgvector.sql`** — `ayah_embedding_chunks`; এম্বেডিং ইটিএল ও HNSW ইনডেক্স পরে |
+| **২.৮** মরফোলজি (ভাষাগত দুই-স্তর) | **`GET /api/research/morphology?q=`** — `crossLanguageRoots` মিল + `web/lib/morphologySemanticLayers.ts`-এ লেক্সিক্যাল ও কোরআনিক-পরিভাষা গ্লোস (BN); `tokenMorphology` QAC/oss ইমপোর্ট পর্যন্ত `not_imported_yet` |
 
 ### Phase 3 — গেমিফায়ড লার্নিং
 
@@ -141,7 +142,7 @@
 | **✓ রেফারেন্স তালিকা** | বাহ্যিক সম্পদের কুরেটেড তালিকা (`quranResearchResources.ts`) + UI `/research` | লাইসেন্স পণ্যায়নের আগে যাচাই |
 | **~✓ আয়াত concordance** | **`GET /api/research/concordance`** — `q`, `mode`, `limit`; UI `/research` | `word-corpus.json`; ভেক্টর লেয়ার আলাদা |
 | **~✓ অনুবাদ-ব্লব মিল** | **`GET /api/research/meaning-search`** — `_searchText`; ইংরেজি/বাংলা টোকেন অনুসন্ধান (ভেক্টর নয়) | সার্ভারে `loadAllAyahsServer()` |
-| **উচ্চ** | **মরফো ট্যাগ ইমপোর্ট** — QAC বা সামঞ্জস্যপূর্ণ OSS টেবিল → অভ্যন্তরীণ JSON/SQLite | **`GET /api/research/morphology`** — রুট যোগ + ইমপোর্ট পাইপলাইন |
+| **~✓ মরফোলজি API (দুই স্তর)** | **`GET /api/research/morphology?q=`** — `morphologySemanticLayers.ts`; পূর্ণ টোকেন মরফো এখনো নেই | **উচ্চ** — মরফো ট্যাগ ইমপোর্ট (QAC/oss) → `tokenMorphology`; UI |
 | **মাঝারি** | **এক্সপোর্ট** — সার্চ/ফ্রিকোয়েন্সি ফল CSV/JSON + সূত্রের URI; **ল্যাব নোট** `.txt` (APA/MLA খসড়া) চালু | পূর্ণ সার্চ রিজাল্ট CSV/JSON পাইপলাইন TODO |
 | **মাঝারি** | **রাসম/হাফস ভিন্নতা** — ডাটা লাইসেন্স সাপেক্ষে টগল বা “অন্য পাঠ দেখুন” লিঙ্ক | Tanzil বহু রূপান্তর নিয়ম মেনে |
 | **~✓ তাফসীর প্রবেশ** | **`/research/tafsir`** + সম্পদ প্যানেল; Iframe নয় | গ্রন্থপাঠ লাইসেন্সভেদে লিঙ্ক-অনলি |
@@ -237,11 +238,11 @@
 
 Follow `ROADMAP.md`. **Never add hadith text, references, citations, datasets, or features** — Quran-centric scope only (see ROADMAP “স্থায়ী প্রজেক্ট সীমা”).
 
-**Shipped (high level):** JSON + `GET /api/search` (partial/exact, roots); `/research` (word-frequency, concordance UI, resources panel); **`GET /api/research/concordance`**, **`GET /api/research/meaning-search`** (translation `_searchText` match — not embedding search); `/research/lab` (ontology/munasabah seeds, chronology, workspace, tafsir entry); `/research/tafsir`; researcher notes (`researchWorkspaceLocal`, AyahBlock “গবেষক নোট”, `?v=` prefilled); home **`?q=`** search prefilled; Supabase scaffolds **`ayahs_fts`** + **`ayah_embedding_chunks`** (pgvector — ETL/index later); `/learn`, `/tutor`, `/wallet` local demos; `MainContentErrorBoundary`; nav: research lab + tafsir hub; `docs/RESEARCH_LAB.md`.
+**Shipped (high level):** JSON + `GET /api/search` (partial/exact, roots); `/research` (word-frequency, concordance UI, resources panel); **`GET /api/research/concordance`**, **`GET /api/research/meaning-search`** (translation `_searchText` match — not embedding search); **`GET /api/research/morphology?q=`** (cross-root match + lexical vs quranic-register BN gloss layers; token-level morph pending); `/research/lab` (ontology/munasabah seeds, chronology, workspace, tafsir entry); `/research/tafsir`; researcher notes (`researchWorkspaceLocal`, AyahBlock “গবেষক নোট”, `?v=` prefilled); home **`?q=`** search prefilled; Supabase scaffolds **`ayahs_fts`** + **`ayah_embedding_chunks`** (pgvector — ETL/index later); `/learn`, `/tutor`, `/wallet` local demos; `MainContentErrorBoundary`; nav: research lab + tafsir hub; `docs/RESEARCH_LAB.md`.
 
 **Near-term hardening (see roadmap section):** API rate limits/cache for research routes; unit tests + CI (e.g. GitHub Actions); `NEXT_PUBLIC_SITE_URL` in prod; dictionary `User-Agent`; PWA `shortcuts` (home, research hub, tafsir hub); optional `docs/DATA.md` / `.env.example`; Next.js stack is **15.x** today — future major: ESLint CLI codemod when `next lint` is removed.
 
-**Planned depth:** morphology (QAC/OSS) import + full `morphology` API/UI; real vector search after `ayah_embedding_chunks` ETL + HNSW; `ayahs_fts` population + hybrid search; cloud sync for `researchWorkspaceLocal` + `learningLocal`/`walletLocal`; rasm/qiraat toggles (license-dependent); full research results CSV/JSON export (search, frequency, lab notes bulk).
+**Planned depth:** morphology **full token tables** (QAC/OSS import) + richer `morphology` UI; real vector search after `ayah_embedding_chunks` ETL + HNSW; `ayahs_fts` population + hybrid search; cloud sync for `researchWorkspaceLocal` + `learningLocal`/`walletLocal`; rasm/qiraat toggles (license-dependent); full research results CSV/JSON export (search, frequency, lab notes bulk).
 
 **Future value-add (Quran-centric, optional):** service worker offline caching for learning + selected surahs; guided onboarding tour (e.g. joyride-style) for lab/tafsir/learn; a11y hardening for learn D&D and tutor; post-auth public share links for lab notes.
 

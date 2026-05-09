@@ -19,14 +19,21 @@ const BOX =
 
 type Props = {
   pairs: AlphabetPair[];
+  /** নিচের হরফ ব্যাঙ্কের সাজ — এলোমেলো (আধুনিক) না হিজাই ক্রম */
+  bankOrder?: "shuffle" | "hijai";
   /** প্রতিটি নতুন সম্পূর্ণ সমাধানের পর একবার কল */
   onSolved?: () => void;
   /** রিসেট চাপলে */
   onReset?: () => void;
 };
 
+function orderedPairs(seed: AlphabetPair[]): AlphabetPair[] {
+  return [...seed];
+}
+
 export default function AlphabetDragExercise({
   pairs,
+  bankOrder = "shuffle",
   onSolved,
   onReset,
 }: Props) {
@@ -37,18 +44,20 @@ export default function AlphabetDragExercise({
   const [picked, setPicked] = useState<AlphabetPair | null>(null);
   const [wrongSlot, setWrongSlot] = useState<number | null>(null);
   const [dragBank, setDragBank] = useState<AlphabetPair[]>(() =>
-    shuffledPairs(pairs),
+    bankOrder === "hijai" ? orderedPairs(pairs) : shuffledPairs(pairs),
   );
 
   const solvedRef = useRef(false);
 
   useEffect(() => {
+    const bank =
+      bankOrder === "hijai" ? orderedPairs(pairs) : shuffledPairs(pairs);
     setSlots(pairs.map(() => null));
-    setDragBank(shuffledPairs(pairs));
+    setDragBank(bank);
     solvedRef.current = false;
     setPicked(null);
     setWrongSlot(null);
-  }, [pairs]);
+  }, [pairs, bankOrder]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -111,13 +120,15 @@ export default function AlphabetDragExercise({
   }, [dragBank, pairs, slots]);
 
   const reset = useCallback(() => {
+    const bank =
+      bankOrder === "hijai" ? orderedPairs(pairs) : shuffledPairs(pairs);
     setSlots(pairs.map(() => null));
-    setDragBank(shuffledPairs(pairs));
+    setDragBank(bank);
     solvedRef.current = false;
     setPicked(null);
     setWrongSlot(null);
     onReset?.();
-  }, [pairs, onReset]);
+  }, [pairs, bankOrder, onReset]);
 
   const bankGridClass =
     pairs.length <= 4

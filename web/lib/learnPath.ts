@@ -25,7 +25,7 @@ export const LEARN_PHASES: LearnPathPhase[] = [
     whyBn:
       "মস্তিষ্ক ছোট লক্ষ্য পছন্দ করে। “আজ এই একটু” বললে বেশিরভাগ দিন জিতে যান।",
     modules: [
-      { labelBn: "নিচে তিন ধাপ — আজকের মেনু", href: "#daily-flow" },
+      { labelBn: "নিচে চার ধাপের মেনু — আজকের গতি সেট করুন", href: "#daily-flow" },
       {
         labelBn: "হিকমাহ ওয়ালেট (পয়েন্ট দেখতে)",
         href: "/wallet",
@@ -109,19 +109,21 @@ export const LEARN_PHASES: LearnPathPhase[] = [
   },
 ];
 
-/** খুব সহজ শুরু — আজই তিনটা ছোট পদক্ষেপ। */
+/** খুব সহজ শুরু — আজ ই শেখার পথ। */
 export const LEARN_QUICK_START = [
   {
     key: "q1",
-    titleBn: "৩ মিনিট · আজকের এক লাইন",
-    bodyBn: "ধাপ ১ খুলুন, মিশন একবার পড়ে “হয়ে গেছে” চাপুন — স্ট্রিক ও পয়েন্ট শুরু।",
+    titleBn: "ধাপ ১ · ২৮ হরফ টিপুন",
+    bodyBn:
+      "প্রতিটি আরবি হরফে টিপে বাংলায় নাম শুনুন; সবগুলো করা হয়ে গেলে ড্র্যাগ মিল খুলবে নিজে।",
     href: "#daily-flow" as const,
     accent: "teal" as const,
   },
   {
     key: "q2",
-    titleBn: "৫ মিনিট · চার হরফ খেলা",
-    bodyBn: "ধাপ ২ — ছবি ও শব্দ মিলিয়ে أ ب ت ث; চাপ বোধ করলে থামুন, আবার আসুন।",
+    titleBn: "ধাপ ২ · চার হরফের খেলা",
+    bodyBn:
+      "ছবি ও শব্দ মিলিয়ে أ ب ت ث; এলোমেলো বা হিজাই ক্রমে ব্যাঙ্ক বেছে নিন।",
     href: "#daily-flow" as const,
     accent: "gold" as const,
   },

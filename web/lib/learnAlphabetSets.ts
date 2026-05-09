@@ -4,6 +4,8 @@
  */
 export type AlphabetPair = {
   letter: string;
+  /** বাংলায় শিক্ষাগত নাম — উচ্চারণ টিউটর আর বিকল্প টিএসটি */
+  nameBn?: string;
   /** বাংলায় ছবি + সংক্ষিপ্ত ব্যাখ্যা */
   wordBn: string;
   emoji: string;
@@ -11,7 +13,43 @@ export type AlphabetPair = {
   arabicWord: string;
 };
 
-/** হিজাই আদেশ (২৮) — أ ব থেকে ي পর্যন্ত */
+/** হিজাই আদেশ (২৮) — أ ব থেকে ي পর্যন্ত · শব্দমিল ও রাউন্ড খেলায় ভিত্তি */
+export function letterNameBn(letter: string): string | undefined {
+  return HIJAI_NAME_BN[letter];
+}
+
+const HIJAI_NAME_BN: Record<string, string> = {
+  أ: "আলিফ",
+  ب: "বা",
+  ت: "তা",
+  ث: "সা",
+  ج: "জিম",
+  ح: "মোটা হা অথবা হায়ে মুনফাখাহ",
+  خ: "খা",
+  د: "দাল",
+  ذ: "যাল",
+  ر: "রা",
+  ز: "জা অথবা যায়",
+  س: "সিন",
+  ش: "শিন",
+  ص: "সোয়াদ",
+  ض: "দোয়াদ",
+  ط: "টয়া অথবা তোয়",
+  ظ: "যোয়",
+  ع: "আয়িন",
+  غ: "ঘয়িন অথবা গোয়িন",
+  ف: "ফা",
+  ق: "ক্বাফ",
+  ك: "কাফ",
+  ل: "লাম",
+  م: "মীম",
+  ن: "নূন",
+  ه: "ছোট হা",
+  و: "ওয়াও",
+  ي: "ইয়া",
+  ء: "হামজা",
+};
+
 export const HIJAI_ALPHABET_28: AlphabetPair[] = [
   {
     letter: "أ",
@@ -183,6 +221,65 @@ export const HIJAI_ALPHABET_28: AlphabetPair[] = [
     wordBn: "হাতের ছবি · আরবি يد মানে হাত — শুরুর হরফ ইয়া‘ (ي)",
   },
 ];
+
+/** পিডিএফ অনুপ্রাণিত — তিন সারিতে ১২, ১০, ৭ (মোট ২৯ হরফ). */
+export const HIJAI_SOUNDBOARD_ROW_COUNTS = [12, 10, 7] as const;
+
+const HAMZA_PAIR: AlphabetPair = {
+  letter: "ء",
+  emoji: "✨",
+  arabicWord: "شيء",
+  wordBn:
+    "কিছু/বস্তু · আরবি شيء এ হামজা চিহ্ন (ء) — তালিকায় ي এর ঠিক আগে থাকে",
+};
+
+const HIJAI_LETTER_KEYS_PDF_ROW_ORDER: readonly string[] = [
+  "أ",
+  "ب",
+  "ت",
+  "ث",
+  "ج",
+  "ح",
+  "خ",
+  "د",
+  "ذ",
+  "ر",
+  "ز",
+  "س",
+  "ش",
+  "ص",
+  "ض",
+  "ط",
+  "ظ",
+  "ع",
+  "غ",
+  "ف",
+  "ق",
+  "ك",
+  "ل",
+  "م",
+  "ن",
+  "و",
+  "ه",
+  "ء",
+  "ي",
+];
+
+export function hijaiSoundboardLettersPdf29(): AlphabetPair[] {
+  const byLetter = Object.fromEntries(
+    HIJAI_ALPHABET_28.map((p) => [p.letter, p]),
+  );
+  return HIJAI_LETTER_KEYS_PDF_ROW_ORDER.map((k) =>
+    k === "ء" ? HAMZA_PAIR : (byLetter[k] as AlphabetPair),
+  );
+}
+
+export function hijaiLettersWithNames(): AlphabetPair[] {
+  return hijaiSoundboardLettersPdf29().map((p) => ({
+    ...p,
+    nameBn: HIJAI_NAME_BN[p.letter],
+  }));
+}
 
 /** দৈনিক ধাপ ২ — প্রথম চারটি হরফ (সহজ শুরু, একই পদ্ধতি) */
 export const ALPHABET_DAILY_PAIRS: AlphabetPair[] = HIJAI_ALPHABET_28.slice(0, 4);

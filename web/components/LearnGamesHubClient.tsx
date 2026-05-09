@@ -5,10 +5,10 @@ import Link from "next/link";
 export default function LearnGamesHubClient() {
   const cards = [
     {
-      href: "/learn",
-      title: "দৈনিক তিন ধাপ",
-      desc: "মূল «শেখা» পেজে বড় ছবি, দ্রুত শুরু ও আজকের তিন ধাপ এক জায়গায়।",
-      cta: "শেখার মূল পেজ খুলুন",
+      href: "/learn/fundamentals",
+      title: "ফান্ডামেন্টালস ল্যাব",
+      desc: "আধুনিক বর্ণ ল্যাব, মাইক্রো কুইজ, অনুমানমূলক অ্যাডাপ্ট ফিড ও XP — মূল শেখার ট্র্যাক ।",
+      cta: "ফান্ডামেন্টালস খুলুন",
       accent:
         "border-[var(--islamic-teal)]/30 bg-white/85 dark:border-teal-800/45 dark:bg-teal-950/45",
     },
@@ -34,10 +34,10 @@ export default function LearnGamesHubClient() {
     <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 text-[var(--islamic-ink)] dark:text-teal-100/95">
       <nav className="mb-6 font-[family-name:var(--font-bn)] text-sm">
         <Link
-          href="/learn"
+          href="/learn/fundamentals"
           className="text-[var(--islamic-teal)] underline-offset-4 hover:underline dark:text-teal-400"
         >
-          ← শেখার মূল পেজ
+          ← ফান্ডামেন্টালস ল্যাব
         </Link>
       </nav>
 

@@ -30,6 +30,7 @@ npm run dev
 | `GET /api/research/word-frequency` | `needle` — মক্কী/মাদানী বাকেট |
 | `GET /api/research/concordance` | `q`, `mode`, `limit` — টোকেন মিল ও আয়াত সূচী |
 | `GET /api/research/meaning-search` | `q`, `mode` — `_searchText` অনুবাদ-ব্লব মিল (ভেক্টর নয়) |
+| `GET /api/research/morphology` | `q` — বহুভাষা রুট মিল + লেক্সিক্যাল/কোরআনিক-পরিভাষা BN গ্লোস; টোকেন রূপ QAC/oss ইমপোর্ট পরে |
 | `POST /api/wallet/redeem`, `/api/wallet/donate` | স্টাব |
 
 ## স্ক্রিপ্ট

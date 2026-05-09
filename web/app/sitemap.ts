@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/research/lab",
     "/research/tafsir",
     "/learn",
+    "/learn/fundamentals",
     "/learn/games",
     "/learn/games/extra-alphabet",
     "/learn/games/ligatures",
